@@ -1,0 +1,37 @@
+
+import { useEffect, useCallback, useState } from 'react';
+
+import { usePlaidLink, PlaidLinkOnSuccess } from 'react-plaid-link';
+
+const SimplePlaidLink = () => {
+  const [token, setToken] = useState<string | null>(null);
+
+  // get link_token from your server when component mounts
+  useEffect(() => {
+    const createLinkToken = async () => {
+      const response = await fetch('/api/create_link_token', { method: 'POST' });
+      const { link_token } = await response.json();
+      setToken(link_token);
+    };
+    createLinkToken();
+  }, []);
+
+  const onSuccess = useCallback<PlaidLinkOnSuccess>((publicToken, metadata) => {
+    console.log(publicToken, metadata);
+  }, []);
+
+  const { open, ready } = usePlaidLink({
+    token,
+    onSuccess,
+    // onEvent
+    // onExit
+  });
+
+  return (
+    <button onClick={() => open()} disabled={!ready}>
+      Connect a bank account
+    </button>
+  );
+};
+
+export default SimplePlaidLink;
